@@ -457,10 +457,14 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
       const computed = getComputedStyle(node);
       const before = getComputedStyle(node, "::before");
       const after = getComputedStyle(node, "::after");
-      const paleSurface = isPale(computed.backgroundColor) || isPale(before.backgroundColor) || isPale(after.backgroundColor);
-      if (!paleSurface) continue;
       const text = (node.textContent || "").trim();
-      if (!text || rect.bottom < window.innerHeight * 0.45) continue;
+      const pseudoText = [before.content, after.content]
+        .map((value) => value.replace(/^["']|["']$/g, "").trim())
+        .filter(Boolean)
+        .join(" ");
+      const paleSurface = isPale(computed.backgroundColor) || isPale(before.backgroundColor) || isPale(after.backgroundColor);
+      if (!paleSurface || rect.bottom < window.innerHeight * 0.45) continue;
+      if (!text && !pseudoText) continue;
       node.dataset.doubaoSkinSurface = "themed";
       node.style.setProperty("background", surface, "important");
       node.style.setProperty("color", foreground, "important");
