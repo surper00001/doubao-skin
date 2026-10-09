@@ -432,44 +432,37 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   const transientStyle = document.createElement("style");
   transientStyle.id = data.styleId + "-transient-surfaces";
   document.head.appendChild(transientStyle);
-  const isPale = (value) => {
-    const match = value.match(/[\d.]+/g);
-    if (!match) return false;
-    const [r, g, b, a = 1] = match.map(Number);
-    return a >= 0.72 && r >= 238 && g >= 238 && b >= 238;
-  };
   const normalizeTransientSurfaces = () => {
-    const themeId = document.documentElement.dataset.doubaoSkin;
-    const theme = data.themes.find((candidate) => candidate.id === themeId);
-    const dark = theme ? !isLightSurface(theme.surface) : document.documentElement.getAttribute("data-theme") === "dark";
+    const dark = document.documentElement.getAttribute("data-theme") === "dark";
     const ink = dark ? "#172033" : "#0f172a";
     transientStyle.textContent =
       'body [data-doubao-skin-surface="themed"],' +
-      'body [data-doubao-skin-surface="themed"] *,' +
-      'body [data-doubao-skin-surface="themed"]::before,' +
-      'body [data-doubao-skin-surface="themed"]::after {' +
+      'body [data-doubao-skin-surface="themed"] * {' +
       'color:' + ink + ' !important;fill:' + ink + ' !important;stroke:' + ink +
       ' !important;background-image:none !important;}';
-    const candidates = document.querySelectorAll("body *");
-    for (const node of candidates) {
+    const parseColor = (value) => {
+      const text = String(value);
+      const marker = text.lastIndexOf("(");
+      const end = text.lastIndexOf(")");
+      if (marker < 0 || end <= marker) return null;
+      const parts = text.slice(marker + 1, end).split(",").map((part) => Number.parseFloat(part.trim()));
+      if (parts.length < 3 || parts.some((part) => Number.isNaN(part))) return null;
+      return { red: parts[0], green: parts[1], blue: parts[2], alpha: parts[3] ?? 1 };
+    };
+    const isPaleColor = (value) => {
+      const color = parseColor(value);
+      return !!color && color.alpha >= 0.72 && color.red >= 240 && color.green >= 240 && color.blue >= 240;
+    };
+    for (const node of document.querySelectorAll("body *")) {
+      if (node.dataset.doubaoSkinSurface === "themed") continue;
       const rect = node.getBoundingClientRect();
-      // 真实“准备任务上下文”卡宽约 340、高约 90，位于输入框正上方；不能限制成
-      // height >= 36 后又误要求卡片自身必须直接包含文字。白色视觉面和文字/图标
-      // 可能分别在不同子节点或伪元素中，因此只要附近内容区出现等待文案即可接管。
-      if (rect.width < 220 || rect.height < 24 || rect.width > 760 || rect.height > 260) continue;
+      if (rect.width < 220 || rect.height > 760 || rect.height < 24 || rect.height > 260) continue;
+      if (rect.bottom < window.innerHeight * 0.35) continue;
+      if (rect.top < window.innerHeight * 0.35 || rect.left < 260) continue;
       const computed = getComputedStyle(node);
       const before = getComputedStyle(node, "::before");
       const after = getComputedStyle(node, "::after");
-      const paleSurface = isPale(computed.backgroundColor) || isPale(before.backgroundColor) || isPale(after.backgroundColor);
-      if (!paleSurface || rect.bottom < window.innerHeight * 0.35) continue;
-      const nearby = document.elementFromPoint(rect.left + rect.width / 2, rect.bottom - 8) || node;
-      const context = (node.parentElement || node);
-      const pseudoContent = [before.content, after.content, getComputedStyle(context, "::before").content, getComputedStyle(context, "::after").content].join(" ");
-      const contextText = (context.textContent || "") + (nearby.textContent || "") + document.body.textContent + pseudoContent;
-      const hasWaitingContext = /正在|准备|任务上下文|处理中|生成中|等待|完成[\s\d/]+|取消|展开|收起/.test(contextText);
-      const inMainInputArea = Boolean(node.closest?.("#chat-route-main main")) ||
-        (rect.top > window.innerHeight * 0.45 && rect.left > 260);
-      if (!hasWaitingContext && !inMainInputArea) continue;
+      if (!isPaleColor(computed.backgroundColor) && !isPaleColor(before.backgroundColor) && !isPaleColor(after.backgroundColor)) continue;
       node.dataset.doubaoSkinSurface = "themed";
       node.style.setProperty("color", ink, "important");
       for (const child of node.querySelectorAll("*")) {
@@ -480,6 +473,7 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
       }
     }
   };
+
 
   const mountIntoNativeActions = () => {
     const labels = ["对话摘要", "更多"];
@@ -534,7 +528,7 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   startup();
 
   // 供脚本化调用与测试：window.__doubaoSkin.importFromDataUrl(dataUrl, name)
-  window.__doubaoSkin = { importFromDataUrl, setTheme, clearTheme, deleteCustom };
+  window.__doubaoSkin = { importFromDataUrl, setTheme, clearTheme, deleteCustom, normalizeTransientSurfaces };
   return true;
 })()`;
 }

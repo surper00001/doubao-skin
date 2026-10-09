@@ -130,8 +130,8 @@ test("renders a toolbar-native skin entry instead of an emoji floating button", 
   assert.match(script, /position:fixed;top:49px/);
   assert.match(script, /normalizeTransientSurfaces/);
   assert.match(script, /rect\.bottom < window\.innerHeight \* 0\.35/);
-  assert.match(script, /const contextText =/);
-  assert.match(script, /正在\|准备\|任务上下文/);
+  assert.match(script, /const parseColor =/);
+  assert.match(script, /const isPaleColor =/);
   assert.match(script, /requestAnimationFrame/);
   assert.match(script, /panel\.setAttribute\("role", "dialog"\)/);
   assert.match(script, /panel\.setAttribute\("aria-label", "外观设置"\)/);
