@@ -464,9 +464,12 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
       if (!paleSurface || rect.bottom < window.innerHeight * 0.35) continue;
       const nearby = document.elementFromPoint(rect.left + rect.width / 2, rect.bottom - 8) || node;
       const context = (node.parentElement || node);
-      const contextText = (context.textContent || "") + (nearby.textContent || "") + document.body.textContent +
-        [before.content, after.content, getComputedStyle(context, "::before").content, getComputedStyle(context, "::after").content].join(" ");
-      if (!/正在|准备|任务上下文|处理中|生成中|等待|完成[\\s\\d/]+|取消|展开|收起/.test(contextText)) continue;
+      const pseudoContent = [before.content, after.content, getComputedStyle(context, "::before").content, getComputedStyle(context, "::after").content].join(" ");
+      const contextText = (context.textContent || "") + (nearby.textContent || "") + document.body.textContent + pseudoContent;
+      const hasWaitingContext = /正在|准备|任务上下文|处理中|生成中|等待|完成[\s\d/]+|取消|展开|收起/.test(contextText);
+      const inMainInputArea = Boolean(node.closest?.("#chat-route-main main")) ||
+        (rect.top > window.innerHeight * 0.45 && rect.left > 260);
+      if (!hasWaitingContext && !inMainInputArea) continue;
       node.dataset.doubaoSkinSurface = "themed";
       node.style.setProperty("color", ink, "important");
       for (const child of node.querySelectorAll("*")) {
