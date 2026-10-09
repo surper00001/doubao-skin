@@ -698,6 +698,24 @@ button[aria-label^="关闭"][aria-label*="自动播报"]:hover {
   color: var(--db-text) !important;
 }
 
+/* 任务执行期间底部的“等待 / 完成 n / n”状态框：原生文字可能固定为 #999，
+   主题磨砂背景在部分浅色皮肤中与其过于接近。用稳定结构关系接管前景与容器。 */
+[class*=bottom-center-button-] [class*=root-] > button,
+[class*=bottom-center-button-] [class*=root-] > button * {
+  color: var(--db-text) !important;
+}
+[class*=bottom-center-button-] [class*=root-] > button {
+  background: color-mix(in srgb, var(--db-surface) 94%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--db-text) 16%, transparent) !important;
+}
+/* 正在思考/执行步骤同样保证正文与图标不落入低对比的原生 tertiary 色。 */
+[class*=thinking-box-root],
+[class*=thinking-box-root] [data-thinking-box],
+[class*=thinking-box-root] [class*=thinking-title-] {
+  color: color-mix(in srgb, var(--db-text) 82%, transparent) !important;
+  --thinking-icon-color: color-mix(in srgb, var(--db-text) 66%, transparent) !important;
+}
+
 /* brand 文案（copy 为空时不显示） */
 #root::before {
   position: fixed;

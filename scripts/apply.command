@@ -172,6 +172,6 @@ else
   disown
 fi
 
-echo "已在后台开始换肤。$DOUBAO_CLIENT_NAME重启后右上角会出现 🎨 按钮。"
+echo "已在后台开始换肤。$DOUBAO_CLIENT_NAME重启后右上角会出现调色盘图标按钮。"
 echo "如需排查，请查看 $LOG。"
 exit 0

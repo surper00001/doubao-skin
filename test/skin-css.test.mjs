@@ -118,8 +118,13 @@ test("renders a toolbar-native skin entry instead of an emoji floating button", 
   assert.match(script, /height:26px/);
   assert.match(script, /padding:4px/);
   assert.match(script, /border-radius:6px/);
-  assert.match(script, /top:14\.5px/);
-  assert.match(script, /right:154px/);
+  assert.doesNotMatch(script, /position:fixed;top:/);
+  assert.doesNotMatch(script, /right:154px/);
+  assert.match(script, /mountIntoNativeActions/);
+  assert.match(script, /打开侧边工作台/);
+  assert.match(script, /收起侧边工作台/);
+  assert.match(script, /group\.insertBefore\(root, anchor\)/);
+  assert.match(script, /MutationObserver/);
   assert.match(script, /panel\.setAttribute\("role", "dialog"\)/);
   assert.match(script, /panel\.setAttribute\("aria-label", "外观设置"\)/);
   assert.match(script, /grid-template-columns:1fr 1fr/);
@@ -127,6 +132,21 @@ test("renders a toolbar-native skin entry instead of an emoji floating button", 
   assert.match(script, /恢复原生界面/);
   assert.match(script, /aria-label.*更换皮肤/);
   assert.doesNotMatch(script, /textContent = "\\\\u\{1F3A8\}"/);
+});
+
+test("keeps task progress and thinking states readable", () => {
+  const css = cssFor({
+    accent: "#24C9D7",
+    secondary: "#EF8FD3",
+    surface: "#F1F8FA",
+    text: "#173640",
+  });
+
+  assert.match(css, /\[class\*=bottom-center-button-\] \[class\*=root-\] > button/);
+  assert.match(css, /color: var\(--db-text\) !important;/);
+  assert.match(css, /border: 1px solid color-mix\(in srgb, var\(--db-text\) 16%, transparent\) !important;/);
+  assert.match(css, /\[class\*=thinking-box-root\]/);
+  assert.match(css, /--thinking-icon-color:/);
 });
 
 test("themes current and legacy input suggestion panels instead of leaving them white", () => {

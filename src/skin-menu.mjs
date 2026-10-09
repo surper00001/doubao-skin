@@ -52,11 +52,12 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
     document.head.appendChild(style);
   }
 
+  window.__doubaoSkinMountObserver?.disconnect?.();
   document.getElementById(data.menuId)?.remove();
   const root = document.createElement("div");
   root.id = data.menuId;
-  // 对齐新版豆包顶栏原生按钮：26px 高宽、6px 圆角、4px 内边距；与右侧按钮组保持 8px 间距。
-  root.style.cssText = "position:fixed;top:14.5px;right:154px;z-index:2147483000;font:500 13px/1.4 system-ui;user-select:none;display:flex;flex-direction:column;align-items:flex-end;color:var(--s-color-text-primary,#1f2329);";
+  // 作为原生顶栏按钮组的真实 flex 子项挂载；侧栏开合、窗口缩放时由原布局自动重排。
+  root.style.cssText = "position:relative;z-index:2147483000;font:500 13px/1.4 system-ui;user-select:none;display:flex;flex:0 0 auto;align-items:center;color:var(--s-color-text-primary,#1f2329);";
 
   const button = document.createElement("button");
   button.type = "button";
@@ -68,7 +69,7 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   const panel = document.createElement("div");
   panel.setAttribute("role", "dialog");
   panel.setAttribute("aria-label", "外观设置");
-  panel.style.cssText = "display:none;margin-top:8px;width:292px;padding:14px;border-radius:14px;border:1px solid var(--s-color-border-secondary,rgba(31,35,41,.10));background:var(--s-color-bg-float,rgba(255,255,255,.96));backdrop-filter:blur(20px);box-shadow:0 12px 36px rgba(0,0,0,.16);color:var(--s-color-text-primary,#1f2329);box-sizing:border-box;";
+  panel.style.cssText = "display:none;position:absolute;top:34px;right:0;width:292px;padding:14px;border-radius:14px;border:1px solid var(--s-color-border-secondary,rgba(31,35,41,.10));background:var(--s-color-bg-float,rgba(255,255,255,.96));backdrop-filter:blur(20px);box-shadow:0 12px 36px rgba(0,0,0,.16);color:var(--s-color-text-primary,#1f2329);box-sizing:border-box;";
 
   const header = document.createElement("div");
   header.style.cssText = "display:flex;align-items:flex-start;justify-content:space-between;margin:0 2px 12px;";
@@ -412,7 +413,23 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   });
 
   root.append(button, panel, picker);
-  document.body.appendChild(root);
+  const mountIntoNativeActions = () => {
+    const labels = ["打开侧边工作台", "收起侧边工作台", "全屏显示"];
+    const candidates = [...document.querySelectorAll("button[aria-label]")]
+      .filter((node) => labels.includes(node.getAttribute("aria-label")))
+      .filter((node) => node.getClientRects().length > 0 && node.getBoundingClientRect().width > 0);
+    const anchor = candidates.find((node) => node.getAttribute("aria-label") === "打开侧边工作台")
+      ?? candidates.find((node) => node.getAttribute("aria-label") === "收起侧边工作台")
+      ?? candidates.find((node) => node.getAttribute("aria-label") === "全屏显示");
+    const group = anchor?.parentElement;
+    if (!group || root.parentElement === group) return Boolean(group);
+    group.insertBefore(root, anchor);
+    return true;
+  };
+  mountIntoNativeActions();
+  const mountObserver = new MutationObserver(() => mountIntoNativeActions());
+  mountObserver.observe(document.body, { childList: true, subtree: true });
+  window.__doubaoSkinMountObserver = mountObserver;
   // 决定初始显示哪张皮肤：
   // - explicit（命令显式 apply --theme X）：严格用 activeId，保留"指定主题"语义
   // - 否则（裸 apply，含豆包重启后自动恢复）：优先恢复上一次激活的皮肤
