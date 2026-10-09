@@ -476,12 +476,21 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
 
 
   const mountIntoNativeActions = () => {
-    const labels = ["对话摘要", "更多"];
-    const candidates = [...document.querySelectorAll("button[aria-label]")]
-      .filter((node) => labels.includes(node.getAttribute("aria-label")))
-      .filter((node) => node.getClientRects().length > 0 && node.getBoundingClientRect().width > 0);
-    const anchor = candidates.find((node) => node.getAttribute("aria-label") === "更多")
-      ?? candidates.find((node) => node.getAttribute("aria-label") === "对话摘要");
+    const visible = (node) => {
+      if (!node) return false;
+      const rect = node.getBoundingClientRect();
+      return node.getClientRects().length > 0 && rect.width > 0 && rect.height > 0;
+    };
+    const resolveAnchor = () => {
+      const mainAction = [...document.querySelectorAll("button[aria-label]")]
+        .filter((node) => ["对话摘要", "更多"].includes(node.getAttribute("aria-label")))
+        .find(visible);
+      if (mainAction) return mainAction;
+      return [...document.querySelectorAll("button[aria-label]")]
+        .filter((node) => ["打开侧边工作台", "收起侧边工作台"].includes(node.getAttribute("aria-label")))
+        .find(visible);
+    };
+    const anchor = resolveAnchor();
     const group = anchor?.closest(".flex.items-center.justify-end") ?? anchor?.parentElement;
     if (!group || root.parentElement === group) return Boolean(group);
     const directAnchor = [...group.children].find((node) => node === anchor || node.contains(anchor));
