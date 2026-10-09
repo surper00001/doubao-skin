@@ -429,25 +429,45 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   root.append(button);
   picker.id = data.menuId + "-picker";
   document.body.append(panel, picker);
+  const transientStyle = document.createElement("style");
+  transientStyle.id = data.styleId + "-transient-surfaces";
+  document.head.appendChild(transientStyle);
+  const isPale = (value) => {
+    const match = value.match(/[\d.]+/g);
+    if (!match) return false;
+    const [r, g, b, a = 1] = match.map(Number);
+    return a >= 0.72 && r >= 238 && g >= 238 && b >= 238;
+  };
   const normalizeTransientSurfaces = () => {
     const themeId = document.documentElement.dataset.doubaoSkin;
     const theme = data.themes.find((candidate) => candidate.id === themeId);
     const dark = theme ? !isLightSurface(theme.surface) : document.documentElement.getAttribute("data-theme") === "dark";
     const foreground = dark ? "#f6f2ff" : "#0f172a";
     const surface = dark ? "rgba(17,18,26,.97)" : "rgba(248,250,252,.97)";
-    for (const node of document.querySelectorAll("body *")) {
+    transientStyle.textContent =
+      'body [data-doubao-skin-surface="themed"]::before,' +
+      'body [data-doubao-skin-surface="themed"]::after {' +
+      'background:' + surface + ' !important;color:' + foreground +
+      ' !important;border-color:color-mix(in srgb,' + foreground +
+      ' 14%, transparent) !important;}';
+    const candidates = document.querySelectorAll("body *");
+    for (const node of candidates) {
       const rect = node.getBoundingClientRect();
       if (rect.width < 220 || rect.height < 36 || rect.width > 760 || rect.height > 260) continue;
       const computed = getComputedStyle(node);
-      const match = computed.backgroundColor.match(/[\\d.]+/g);
-      if (!match) continue;
-      const [r, g, b, a = 1] = match.map(Number);
-      if (a < 0.72 || r < 238 || g < 238 || b < 238) continue;
+      const before = getComputedStyle(node, "::before");
+      const after = getComputedStyle(node, "::after");
+      const paleSurface = isPale(computed.backgroundColor) || isPale(before.backgroundColor) || isPale(after.backgroundColor);
+      if (!paleSurface) continue;
       const text = (node.textContent || "").trim();
       if (!text || rect.bottom < window.innerHeight * 0.45) continue;
+      node.dataset.doubaoSkinSurface = "themed";
       node.style.setProperty("background", surface, "important");
       node.style.setProperty("color", foreground, "important");
-      for (const child of node.querySelectorAll("*")) child.style.setProperty("color", foreground, "important");
+      for (const child of node.querySelectorAll("*")) {
+        child.dataset.doubaoSkinSurface = "themed";
+        child.style.setProperty("color", foreground, "important");
+      }
     }
   };
 
