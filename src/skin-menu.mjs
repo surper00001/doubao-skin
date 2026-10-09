@@ -436,9 +436,11 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
       .filter((node) => node.getClientRects().length > 0 && node.getBoundingClientRect().width > 0);
     const anchor = candidates.find((node) => node.getAttribute("aria-label") === "更多")
       ?? candidates.find((node) => node.getAttribute("aria-label") === "对话摘要");
-    const group = anchor?.closest(".flex.items-center.justify-end") ?? anchor?.parentElement?.parentElement;
+    const group = anchor?.closest(".flex.items-center.justify-end") ?? anchor?.parentElement;
     if (!group || root.parentElement === group) return Boolean(group);
-    group.insertBefore(root, anchor);
+    const directAnchor = [...group.children].find((node) => node === anchor || node.contains(anchor));
+    if (!directAnchor) return false;
+    group.insertBefore(root, directAnchor);
     return true;
   };
   mountIntoNativeActions();
