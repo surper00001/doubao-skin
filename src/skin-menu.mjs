@@ -54,6 +54,8 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
 
   window.__doubaoSkinMountObserver?.disconnect?.();
   document.getElementById(data.menuId)?.remove();
+  document.getElementById(data.menuId + "-panel")?.remove();
+  document.getElementById(data.menuId + "-picker")?.remove();
   const root = document.createElement("div");
   root.id = data.menuId;
   // 作为原生顶栏按钮组的真实 flex 子项挂载；侧栏开合、窗口缩放时由原布局自动重排。
@@ -67,9 +69,10 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   button.style.cssText = "display:flex;align-items:center;justify-content:center;position:relative;width:26px;height:26px;border:0;border-radius:6px;background:transparent;color:inherit;cursor:pointer;padding:4px;margin:0;box-sizing:border-box;transition:background-color .16s ease,color .16s ease;transform:none;opacity:1;outline:none;";
 
   const panel = document.createElement("div");
+  panel.id = data.menuId + "-panel";
   panel.setAttribute("role", "dialog");
   panel.setAttribute("aria-label", "外观设置");
-  panel.style.cssText = "display:none;position:absolute;top:34px;right:0;width:292px;padding:14px;border-radius:14px;border:1px solid var(--s-color-border-secondary,rgba(31,35,41,.10));background:var(--s-color-bg-float,rgba(255,255,255,.96));backdrop-filter:blur(20px);box-shadow:0 12px 36px rgba(0,0,0,.16);color:var(--s-color-text-primary,#1f2329);box-sizing:border-box;";
+  panel.style.cssText = "display:none;position:fixed;top:49px;right:50px;z-index:2147483001;width:292px;padding:14px;border-radius:14px;border:1px solid var(--s-color-border-secondary,rgba(31,35,41,.10));background:var(--s-color-bg-float,rgba(255,255,255,.96));backdrop-filter:blur(20px);box-shadow:0 12px 36px rgba(0,0,0,.16);color:var(--s-color-text-primary,#1f2329);box-sizing:border-box;";
 
   const header = document.createElement("div");
   header.style.cssText = "display:flex;align-items:flex-start;justify-content:space-between;margin:0 2px 12px;";
@@ -406,13 +409,26 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   root.addEventListener("mouseenter", () => setPeek(true));
   root.addEventListener("mouseleave", () => setPeek(false));
 
+  const positionPanel = () => {
+    const rect = button.getBoundingClientRect();
+    const gap = 8;
+    const width = 292;
+    const left = Math.max(8, Math.min(window.innerWidth - width - 8, rect.right - width));
+    panel.style.left = left + "px";
+    panel.style.right = "auto";
+    panel.style.top = (rect.bottom + gap) + "px";
+  };
   button.addEventListener("click", () => {
     const open = !isOpen();
+    if (open) positionPanel();
     panel.style.display = open ? "block" : "none";
     setPeek(open);
   });
+  window.addEventListener("resize", () => { if (isOpen()) positionPanel(); });
 
-  root.append(button, panel, picker);
+  root.append(button);
+  picker.id = data.menuId + "-picker";
+  document.body.append(panel, picker);
   const mountIntoNativeActions = () => {
     const labels = ["打开侧边工作台", "收起侧边工作台", "全屏显示"];
     const candidates = [...document.querySelectorAll("button[aria-label]")]
