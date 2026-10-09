@@ -429,6 +429,28 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   root.append(button);
   picker.id = data.menuId + "-picker";
   document.body.append(panel, picker);
+  const normalizeTransientSurfaces = () => {
+    const themeId = document.documentElement.dataset.doubaoSkin;
+    const theme = data.themes.find((candidate) => candidate.id === themeId);
+    const dark = theme ? !isLightSurface(theme.surface) : document.documentElement.getAttribute("data-theme") === "dark";
+    const foreground = dark ? "#f6f2ff" : "#0f172a";
+    const surface = dark ? "rgba(17,18,26,.97)" : "rgba(248,250,252,.97)";
+    for (const node of document.querySelectorAll("body *")) {
+      const rect = node.getBoundingClientRect();
+      if (rect.width < 220 || rect.height < 36 || rect.width > 760 || rect.height > 260) continue;
+      const computed = getComputedStyle(node);
+      const match = computed.backgroundColor.match(/[\\d.]+/g);
+      if (!match) continue;
+      const [r, g, b, a = 1] = match.map(Number);
+      if (a < 0.72 || r < 238 || g < 238 || b < 238) continue;
+      const text = (node.textContent || "").trim();
+      if (!text || rect.bottom < window.innerHeight * 0.45) continue;
+      node.style.setProperty("background", surface, "important");
+      node.style.setProperty("color", foreground, "important");
+      for (const child of node.querySelectorAll("*")) child.style.setProperty("color", foreground, "important");
+    }
+  };
+
   const mountIntoNativeActions = () => {
     const labels = ["对话摘要", "更多"];
     const candidates = [...document.querySelectorAll("button[aria-label]")]
@@ -444,7 +466,17 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
     return true;
   };
   mountIntoNativeActions();
-  const mountObserver = new MutationObserver(() => mountIntoNativeActions());
+  normalizeTransientSurfaces();
+  let normalizeQueued = false;
+  const mountObserver = new MutationObserver(() => {
+    mountIntoNativeActions();
+    if (normalizeQueued) return;
+    normalizeQueued = true;
+    requestAnimationFrame(() => {
+      normalizeQueued = false;
+      normalizeTransientSurfaces();
+    });
+  });
   mountObserver.observe(document.body, { childList: true, subtree: true });
   window.__doubaoSkinMountObserver = mountObserver;
   // 决定初始显示哪张皮肤：
