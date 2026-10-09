@@ -121,8 +121,8 @@ test("renders a toolbar-native skin entry instead of an emoji floating button", 
   assert.doesNotMatch(script, /root\.style\.cssText = "position:fixed/);
   assert.doesNotMatch(script, /root\.style\.cssText = "[^"]*right:154px/);
   assert.match(script, /mountIntoNativeActions/);
-  assert.match(script, /打开侧边工作台/);
-  assert.match(script, /收起侧边工作台/);
+  assert.match(script, /对话摘要/);
+  assert.match(script, /node\.getAttribute\("aria-label"\) === "更多"/);
   assert.match(script, /group\.insertBefore\(root, anchor\)/);
   assert.match(script, /MutationObserver/);
   assert.match(script, /document\.body\.append\(panel, picker\)/);

@@ -430,14 +430,13 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   picker.id = data.menuId + "-picker";
   document.body.append(panel, picker);
   const mountIntoNativeActions = () => {
-    const labels = ["打开侧边工作台", "收起侧边工作台", "全屏显示"];
+    const labels = ["对话摘要", "更多"];
     const candidates = [...document.querySelectorAll("button[aria-label]")]
       .filter((node) => labels.includes(node.getAttribute("aria-label")))
       .filter((node) => node.getClientRects().length > 0 && node.getBoundingClientRect().width > 0);
-    const anchor = candidates.find((node) => node.getAttribute("aria-label") === "打开侧边工作台")
-      ?? candidates.find((node) => node.getAttribute("aria-label") === "收起侧边工作台")
-      ?? candidates.find((node) => node.getAttribute("aria-label") === "全屏显示");
-    const group = anchor?.parentElement;
+    const anchor = candidates.find((node) => node.getAttribute("aria-label") === "更多")
+      ?? candidates.find((node) => node.getAttribute("aria-label") === "对话摘要");
+    const group = anchor?.closest(".flex.items-center.justify-end") ?? anchor?.parentElement?.parentElement;
     if (!group || root.parentElement === group) return Boolean(group);
     group.insertBefore(root, anchor);
     return true;
