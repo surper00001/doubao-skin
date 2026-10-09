@@ -453,24 +453,27 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
     const candidates = document.querySelectorAll("body *");
     for (const node of candidates) {
       const rect = node.getBoundingClientRect();
-      if (rect.width < 220 || rect.height < 36 || rect.width > 760 || rect.height > 260) continue;
+      // 真实“准备任务上下文”卡宽约 340、高约 90，位于输入框正上方；不能限制成
+      // height >= 36 后又误要求卡片自身必须直接包含文字。白色视觉面和文字/图标
+      // 可能分别在不同子节点或伪元素中，因此只要附近内容区出现等待文案即可接管。
+      if (rect.width < 220 || rect.height < 24 || rect.width > 760 || rect.height > 260) continue;
       const computed = getComputedStyle(node);
       const before = getComputedStyle(node, "::before");
       const after = getComputedStyle(node, "::after");
-      const text = (node.textContent || "").trim();
-      const pseudoText = [before.content, after.content]
-        .map((value) => value.replace(/^["']|["']$/g, "").trim())
-        .filter(Boolean)
-        .join(" ");
       const paleSurface = isPale(computed.backgroundColor) || isPale(before.backgroundColor) || isPale(after.backgroundColor);
-      if (!paleSurface || rect.bottom < window.innerHeight * 0.45) continue;
-      if (!text && !pseudoText) continue;
+      if (!paleSurface || rect.bottom < window.innerHeight * 0.35) continue;
+      const nearby = document.elementFromPoint(rect.left + rect.width / 2, rect.bottom - 8) || node;
+      const context = (node.parentElement || node);
+      const contextText = (context.textContent || "") + (nearby.textContent || "") +
+        [before.content, after.content, getComputedStyle(context, "::before").content, getComputedStyle(context, "::after").content].join(" ");
+      if (!/正在|准备|任务上下文|处理中|生成中|等待|完成\s*\d+\s*\/|取消|展开|收起/.test(contextText)) continue;
       node.dataset.doubaoSkinSurface = "themed";
       node.style.setProperty("background", surface, "important");
       node.style.setProperty("color", foreground, "important");
       for (const child of node.querySelectorAll("*")) {
         child.dataset.doubaoSkinSurface = "themed";
         child.style.setProperty("color", foreground, "important");
+        child.style.setProperty("background-color", "transparent", "important");
       }
     }
   };
