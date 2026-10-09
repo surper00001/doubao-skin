@@ -466,7 +466,7 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
       const context = (node.parentElement || node);
       const contextText = (context.textContent || "") + (nearby.textContent || "") +
         [before.content, after.content, getComputedStyle(context, "::before").content, getComputedStyle(context, "::after").content].join(" ");
-      if (!/正在|准备|任务上下文|处理中|生成中|等待|完成\s*\d+\s*\/|取消|展开|收起/.test(contextText)) continue;
+      if (!/正在|准备|任务上下文|处理中|生成中|等待|完成[\\s\\d/]+|取消|展开|收起/.test(contextText)) continue;
       node.dataset.doubaoSkinSurface = "themed";
       node.style.setProperty("background", surface, "important");
       node.style.setProperty("color", foreground, "important");
