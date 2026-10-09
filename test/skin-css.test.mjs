@@ -145,6 +145,9 @@ test("keeps task progress and thinking states readable", () => {
     text: "#173640",
   });
 
+  assert.match(css, /\[class\*=bottom-accessory-\],/);
+  assert.match(css, /\[class\*=bottom-accessory-\] \*,/);
+  assert.match(css, /\[class\*=bottom-accessory-\]::before,/);
   assert.match(css, /\[class\*=bottom-center-button-\] \[class\*=root-\] > button/);
   assert.match(css, /color: var\(--db-text\) !important;/);
   assert.match(css, /border: 1px solid color-mix\(in srgb, var\(--db-text\) 16%, transparent\) !important;/);

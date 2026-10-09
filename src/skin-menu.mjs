@@ -59,7 +59,7 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   const root = document.createElement("div");
   root.id = data.menuId;
   // 作为原生顶栏按钮组的真实 flex 子项挂载；侧栏开合、窗口缩放时由原布局自动重排。
-  root.style.cssText = "position:relative;z-index:2147483000;font:500 13px/1.4 system-ui;user-select:none;display:flex;flex:0 0 auto;align-items:center;color:var(--s-color-text-primary,#1f2329);";
+  root.style.cssText = "position:relative;z-index:2147483000;font:500 13px/1.4 system-ui;user-select:none;display:flex;flex:0 0 auto;align-items:center;color:var(--db-text,var(--dbx-text-primary,var(--s-color-text-primary,#1f2329)));";
 
   const button = document.createElement("button");
   button.type = "button";
@@ -401,7 +401,7 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
   // 新版客户端保持按钮常驻可见，交互反馈与顶部原生图标按钮一致。
   const setPeek = (out) => {
     button.style.backgroundColor = out ? "var(--s-color-fill-hover,rgba(31,35,41,.08))" : "transparent";
-    button.style.color = out ? "var(--s-color-text-primary,#1f2329)" : "inherit";
+    button.style.color = out ? "var(--db-text,var(--dbx-text-primary,var(--s-color-text-primary,#1f2329)))" : "inherit";
     button.style.transform = "none";
     button.style.opacity = "1";
   };

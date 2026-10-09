@@ -700,6 +700,29 @@ button[aria-label^="关闭"][aria-label*="自动播报"]:hover {
 
 /* 任务执行期间底部的“等待 / 完成 n / n”状态框：原生文字可能固定为 #999，
    主题磨砂背景在部分浅色皮肤中与其过于接近。用稳定结构关系接管前景与容器。 */
+/* 任务执行期间输入框上方的完整状态卡（准备上下文 / 等待 / 完成 n / n）。
+   原生容器会保留白色底，而深色主题把内部文字改成浅色，导致白底白字。
+   必须接管 bottom-accessory 整个卡面及其所有后代，不能只改内部按钮。 */
+[class*=bottom-accessory-],
+[class*=bottom-accessory-] > div,
+[class*=bottom-accessory-] [class*=root-] {
+  background: color-mix(in srgb, var(--db-surface) 96%, transparent) !important;
+  color: var(--db-text) !important;
+  border-color: color-mix(in srgb, var(--db-text) 14%, transparent) !important;
+}
+[class*=bottom-accessory-] *,
+[class*=bottom-accessory-] svg {
+  color: var(--db-text) !important;
+  fill: currentColor;
+}
+[class*=bottom-accessory-]::before,
+[class*=bottom-accessory-]::after,
+[class*=bottom-accessory-] > div::before,
+[class*=bottom-accessory-] > div::after {
+  background: color-mix(in srgb, var(--db-surface) 96%, transparent) !important;
+  color: var(--db-text) !important;
+}
+
 [class*=bottom-center-button-] [class*=root-] > button,
 [class*=bottom-center-button-] [class*=root-] > button * {
   color: var(--db-text) !important;
