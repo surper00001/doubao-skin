@@ -442,14 +442,14 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
     const themeId = document.documentElement.dataset.doubaoSkin;
     const theme = data.themes.find((candidate) => candidate.id === themeId);
     const dark = theme ? !isLightSurface(theme.surface) : document.documentElement.getAttribute("data-theme") === "dark";
-    const foreground = dark ? "#f6f2ff" : "#0f172a";
-    const surface = dark ? "rgba(17,18,26,.97)" : "rgba(248,250,252,.97)";
+    const ink = dark ? "#172033" : "#0f172a";
     transientStyle.textContent =
+      'body [data-doubao-skin-surface="themed"],' +
+      'body [data-doubao-skin-surface="themed"] *,' +
       'body [data-doubao-skin-surface="themed"]::before,' +
       'body [data-doubao-skin-surface="themed"]::after {' +
-      'background:' + surface + ' !important;color:' + foreground +
-      ' !important;border-color:color-mix(in srgb,' + foreground +
-      ' 14%, transparent) !important;}';
+      'color:' + ink + ' !important;fill:' + ink + ' !important;stroke:' + ink +
+      ' !important;background-image:none !important;}';
     const candidates = document.querySelectorAll("body *");
     for (const node of candidates) {
       const rect = node.getBoundingClientRect();
@@ -468,12 +468,12 @@ export function buildSkinMenuScript({ entries, activeId, styleId, menuId, cssTem
         [before.content, after.content, getComputedStyle(context, "::before").content, getComputedStyle(context, "::after").content].join(" ");
       if (!/正在|准备|任务上下文|处理中|生成中|等待|完成[\\s\\d/]+|取消|展开|收起/.test(contextText)) continue;
       node.dataset.doubaoSkinSurface = "themed";
-      node.style.setProperty("background", surface, "important");
-      node.style.setProperty("color", foreground, "important");
+      node.style.setProperty("color", ink, "important");
       for (const child of node.querySelectorAll("*")) {
         child.dataset.doubaoSkinSurface = "themed";
-        child.style.setProperty("color", foreground, "important");
-        child.style.setProperty("background-color", "transparent", "important");
+        child.style.setProperty("color", ink, "important");
+        child.style.setProperty("fill", ink, "important");
+        child.style.setProperty("stroke", ink, "important");
       }
     }
   };

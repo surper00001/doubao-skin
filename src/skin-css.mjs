@@ -702,20 +702,36 @@ button[aria-label^="关闭"][aria-label*="自动播报"]:hover {
    主题磨砂背景在部分浅色皮肤中与其过于接近。用稳定结构关系接管前景与容器。 */
 /* 输入框上方的“任务上下文 / 正在准备”大卡。实测该卡是独立于 bottom-accessory
    文本树的临时浮层：白色视觉面可能在一个无文本节点，图标/文案是其兄弟或子层，
-   不能依赖会变化的哈希类名。按位置和尺寸直接限制在主对话输入区，避免误伤侧栏/浏览器。 */
-html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class] {
-  --doubao-task-card-surface: #11121a;
-  --doubao-task-card-text: #f6f2ff;
+   不能依赖会变化的哈希类名，也不能把原生白卡染成深色。这里保留原生卡片底色，
+   仅把卡内文字/图标强制改回深色，彻底避免白底白字；作用域限制在主对话底部。 */
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main {
+  --doubao-task-card-ink: #172033;
 }
 html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="task"],
 html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="Task"],
 html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="context"],
 html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="Context"],
 html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="prepare"],
-html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="Prepare"] {
-  background-color: var(--doubao-task-card-surface) !important;
-  color: var(--doubao-task-card-text) !important;
-  border-color: color-mix(in srgb, var(--doubao-task-card-text) 14%, transparent) !important;
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="Prepare"],
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="task"] *,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="Task"] *,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="context"] *,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="Context"] *,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="prepare"] *,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="Prepare"] * {
+  color: var(--doubao-task-card-ink) !important;
+  fill: var(--doubao-task-card-ink) !important;
+  stroke: var(--doubao-task-card-ink) !important;
+}
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="task"]::before,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="task"]::after,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="Task"]::before,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="Task"]::after,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="context"]::before,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="context"]::after,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="prepare"]::before,
+html[data-doubao-skin][data-theme="dark"] #chat-route-main main [class*="prepare"]::after {
+  color: var(--doubao-task-card-ink) !important;
 }
 
 /* 任务执行期间输入框上方的完整状态卡（准备上下文 / 等待 / 完成 n / n）。

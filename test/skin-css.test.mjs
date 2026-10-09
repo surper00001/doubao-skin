@@ -160,6 +160,21 @@ test("keeps task progress and thinking states readable", () => {
   assert.match(css, /--thinking-icon-color:/);
 });
 
+test("keeps native white task context card text dark instead of recoloring it white", () => {
+  const css = cssFor({
+    accent: "#8B5CF6",
+    secondary: "#5C63A8",
+    surface: "#11121A",
+    text: "#F6F2FF",
+  });
+
+  assert.match(css, /--doubao-task-card-ink: #172033/);
+  assert.match(css, /#chat-route-main main \[class\*="task"\],/);
+  assert.match(css, /color: var\(--doubao-task-card-ink\) !important;/);
+  assert.match(css, /fill: var\(--doubao-task-card-ink\) !important;/);
+  assert.doesNotMatch(css, /--doubao-task-card-surface/);
+});
+
 test("themes current and legacy input suggestion panels instead of leaving them white", () => {
   const css = cssFor({
     accent: "#24C9D7",
